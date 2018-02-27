@@ -1,0 +1,53 @@
+version: '2'
+
+services:
+    application:
+        container_name: vuextodo_application
+        image: debian
+        volumes:
+            - ./:/var/www/laravel
+    workspace:
+        container_name: vuextodo_workspace
+        restart: always
+        image: framgia/laravel-workspace
+        volumes_from:
+            - application
+        tty: true
+    php-fpm:
+        container_name: vuextodo_php-fpm
+        restart: always
+        image: framgia/laravel-php-fpm
+        volumes_from:
+            - application
+        expose:
+            - "9000"
+        links:
+            - workspace
+    nginx:
+        container_name: vuextodo_nginx
+        restart: always
+        image: framgia/laravel-nginx
+        volumes_from:
+            - data
+            - application
+        ports:
+            - "9000:80"
+        links:
+            - php-fpm
+    data:
+        container_name: vuextodo_data
+        image: debian
+        volumes:
+            - .docker/mysql:/var/lib/mysql
+            - .docker/data:/data
+    mysql:
+        container_name: vuextodo_mysql
+        restart: always
+        image: mysql
+        volumes_from:
+            - data
+        expose:
+            - "3306"
+        environment:
+            MYSQL_DATABASE: vuextodo
+            MYSQL_ROOT_PASSWORD: root
