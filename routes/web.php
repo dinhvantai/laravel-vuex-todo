@@ -14,3 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::resource('todos', 'TodoController')->only(['index', 'store', 'update', 'destroy']);
+
+Route::get('todo', function() {
+    return view('todo');
+});

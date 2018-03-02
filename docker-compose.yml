@@ -29,6 +29,7 @@ services:
         image: framgia/laravel-nginx
         volumes_from:
             - data
+            - logs
             - application
         ports:
             - "9000:80"
@@ -40,14 +41,50 @@ services:
         volumes:
             - .docker/mysql:/var/lib/mysql
             - .docker/data:/data
+    data_test:
+        container_name: vuextodo_data_test
+        image: debian
+        volumes:
+            - .docker/mysql_test:/var/lib/mysql
+            - .docker/data_test:/data
+    logs:
+        container_name: vuextodo_logs
+        image: debian
+        volumes:
+            - .docker/logs/nginx:/var/log/nginx
+            - .docker/logs/mongodb:/var/log/mongodb
     mysql:
         container_name: vuextodo_mysql
         restart: always
         image: mysql
         volumes_from:
             - data
+            - logs
         expose:
             - "3306"
         environment:
             MYSQL_DATABASE: vuextodo
+            MYSQL_USER: vuextodo
+            MYSQL_PASSWORD: secret
             MYSQL_ROOT_PASSWORD: root
+    mysql_test:
+        container_name: vuextodo_mysql_test
+        restart: always
+        image: mysql
+        volumes_from:
+            - data_test
+        expose:
+            - "3306"
+        environment:
+            MYSQL_DATABASE: vuextodo_test
+            MYSQL_USER: vuextodo
+            MYSQL_PASSWORD: secret
+            MYSQL_ROOT_PASSWORD: root
+    redis:
+        container_name: vuextodo_redis
+        restart: always
+        image: redis
+        expose:
+            - "6379"
+        volumes_from:
+            - data
